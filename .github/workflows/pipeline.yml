@@ -25,7 +25,7 @@ jobs:
         pip install pylint
 
     - name: Run Pylint
-      run: pylint calculator.py  # Ensure this points to your Python script
+      run: pylint calculator.py
 
   test:
     runs-on: ubuntu-latest
@@ -47,7 +47,14 @@ jobs:
 
     - name: Run tests and generate coverage report
       run: |
-        pytest --cov=calculator test_calculator.py 
+        pytest --cov=calculator --cov-report=html test_calculator.py
+        mv htmlcov coverage_report
+
+    - name: Upload Coverage Report
+      uses: actions/upload-artifact@v3
+      with:
+        name: coverage-report
+        path: coverage_report
 
   build-and-push:
     runs-on: ubuntu-latest
@@ -64,10 +71,10 @@ jobs:
       uses: docker/login-action@v2
       with:
         username: ${{ secrets.DOCKER_USERNAME }}
-        password: ${{ secrets.DOCKER_TOKEN }}  # Ensure this secret is set
+        password: ${{ secrets.DOCKER_TOKEN }}
 
     - name: Build and tag the Docker image
-      run: docker build . --file Dockerfile --tag omaaartamer/python-calculator:latest  # Use your Docker Hub repo
+      run: docker build . --file Dockerfile --tag omaaartamer/python-calculator:latest
 
     - name: Push Docker image to Docker Hub
-      run: docker push omaaartamer/python-calculator:latest  # Use your Docker Hub repo
+      run: docker push omaaartamer/python-calculator:latest
