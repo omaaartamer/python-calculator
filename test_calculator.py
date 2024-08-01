@@ -12,7 +12,7 @@ def test_add():
 
 def test_subtract():
     """Test subtraction of two numbers."""
-    assert subtract(5, 6) == 1
+    assert subtract(5, 6) == -1
 
 
 def test_multiply():
