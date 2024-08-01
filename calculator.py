@@ -1,41 +1,78 @@
-def add(a,b):
-    return a+b
-def subtract(a,b):
-    return a-b
-def multipy(a,b):
-    return a*b
-def divide(a,b):
-    if b==0:
+"""
+    This module is a basic calculator the does basic operations on 2 integers.
+"""
+
+
+def add(a, b):
+    """
+    Add two numbers and return the result.
+
+    Parameters:
+    a (float): The first number.
+    b (float): The second number.
+
+    Returns:
+    float: The sum of the numbers.
+    """
+    return a + b
+
+
+def subtract(c, d):
+    """Return the difference of a and b."""
+    return c-d
+
+
+def multiply(e, f):
+    """
+    Multiply two numbers and return the result.
+
+    Parameters:
+    a (float): The first number.
+    b (float): The second number.
+
+    Returns:
+    float: The product of a and b.
+    """
+    return e*f
+
+
+def divide(g, h):
+    """Return the division of a by b. Raise ValueError if b is zero."""
+    if h == 0:
         raise ValueError("Cannot divide by zero")
-    return a/b
-def modulus(a,b):
-    return a%b
+    return g/h
 
 
-if __name__ =="__main__":
+def modulus(i, j):
+    """Return the modulus of a by b."""
+    return i % j
+
+
+if __name__ == "__main__":
     operation = {
-        'add':add,
+        'add': add,
         'subtract': subtract,
-        'multiply': multipy,
-        'divide':divide,
-        'modulus':modulus  
+        'multiply': multiply,
+        'divide': divide,
+        'modulus': modulus
     }
-    Entry = True
-    while(Entry):
+    ENTRY = True
+    while ENTRY:
         try:
-            a = float(input("Enter the first number: "))
-            b = float(input("Enter the second number: "))
-            Entry = False
+            x = float(input("Enter the first number: "))
+            y = float(input("Enter the second number: "))
+            ENTRY = False
         except ValueError as e:
             print(f"Error: {e}")
-    
-    action = input("Enter Required Mathematical Operation (add, subtract, divide, multiply, modulus): ").strip().lower()
+
+    action = input(
+        "(add, subtract, divide, multiply, modulus): ").strip().lower()
     func = operation.get(action)
     if func:
         try:
-            result = func(a,b)
+            result = func(x, y)
             print(f"{result:.2f}")
         except ValueError as e:
             print(f"Error {e}")
     else:
-        print("Unsupported Operation.")   
+        print("Unsupported Operation.")
