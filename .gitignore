@@ -92,3 +92,4 @@ dmypy.json
 *.log
 
 trial&error.ipynb
+calculator/
