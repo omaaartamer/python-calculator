@@ -1,0 +1,75 @@
+trigger:
+  branches:
+    include:
+      - main
+
+pr:
+  branches:
+    include:
+      - main
+
+jobs:
+- job: Lint
+  displayName: Lint Code
+  pool:
+    vmImage: 'ubuntu-latest'
+  steps:
+    - checkout: self
+
+    - task: UsePythonVersion@0
+      inputs:
+        versionSpec: '3.12.4'
+
+    - script: |
+        python -m pip install --upgrade pip
+        pip install pylint
+      displayName: 'Install dependencies'
+
+    - script: pylint calculator.py
+      displayName: 'Run Pylint'
+
+- job: Test
+  displayName: Run Tests
+  dependsOn: Lint
+  pool:
+    vmImage: 'ubuntu-latest'
+  steps:
+    - checkout: self
+
+    - task: UsePythonVersion@0
+      inputs:
+        versionSpec: '3.12.4'
+
+    - script: |
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
+      displayName: 'Install dependencies'
+
+    - script: |
+        pytest --cov=calculator --cov-report=html test_calculator.py
+        mv htmlcov coverage_report
+      displayName: 'Run tests and generate coverage report'
+
+    - task: PublishPipelineArtifact@1
+      inputs:
+        targetPath: 'coverage_report'
+        artifact: 'coverage-report'
+
+- job: BuildAndPush
+  displayName: Build and Push Docker Image
+  dependsOn: Test
+  pool:
+    vmImage: 'ubuntu-latest'
+  steps:
+    - checkout: self
+
+    - task: DockerInstaller@0
+      displayName: 'Install Docker'
+
+    - task: Bash@3
+      inputs:
+        targetType: 'inline'
+        script: |
+          echo $(DOCKER_TOKEN) | docker login -u $(DOCKER_USERNAME) --password-stdin
+          docker build . --file Dockerfile --tag omaaartamer/python-calculator:latest
+          docker push omaaartamer/python-calculator:latest
