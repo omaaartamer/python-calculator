@@ -16,4 +16,4 @@ COPY . /app
 # Expose port 8000
 EXPOSE 8000
 # Define the command to run the app
-CMD ["python", "calculator.py"]
+CMD ["python", "calculator.py","5","10","subtract"]

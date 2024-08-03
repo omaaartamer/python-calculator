@@ -1,7 +1,8 @@
-"""
-    This module is a basic calculator the does basic operations on 2 integers.
-"""
+import sys
 
+"""
+This module is a basic calculator that performs basic operations on 2 numbers.
+"""
 
 def add(a, b):
     """
@@ -16,63 +17,71 @@ def add(a, b):
     """
     return a + b
 
-
 def subtract(c, d):
-    """Return the difference of a and b."""
-    return c-d
-
+    """Return the difference of c and d."""
+    return c - d
 
 def multiply(e, f):
     """
     Multiply two numbers and return the result.
 
     Parameters:
-    a (float): The first number.
-    b (float): The second number.
+    e (float): The first number.
+    f (float): The second number.
 
     Returns:
-    float: The product of a and b.
+    float: The product of e and f.
     """
-    return e*f
-
+    return e * f
 
 def divide(g, h):
-    """Return the division of a by b. Raise ValueError if b is zero."""
+    """Return the division of g by h. Raise ValueError if h is zero."""
     if h == 0:
         raise ValueError("Cannot divide by zero")
-    return g/h
-
+    return g / h
 
 def modulus(i, j):
-    """Return the modulus of a by b."""
+    """Return the modulus of i by j."""
     return i % j
 
+def main(x,y, oper):
+    # Ensure that the correct number of arguments are provided
+    if len(sys.argv) != 4:
+        print("Usage: python calculator.py <number1> <number2> <operation>")
+        print("Operations: add, subtract, multiply, divide, modulus")
+        sys.exit(1)
 
-if __name__ == "__main__":
-    operation = {
+    # Parse command-line arguments
+    try:
+        a = float(x)
+        b = float(y)
+    except ValueError as e:
+        print(f"Error: Invalid number. {e}")
+        sys.exit(1)
+
+    operation = oper.lower()
+
+    # Define available operations
+    operations = {
         'add': add,
         'subtract': subtract,
         'multiply': multiply,
         'divide': divide,
         'modulus': modulus
     }
-    ENTRY = True
-    while ENTRY:
-        try:
-            x = float(input("Enter the first number: "))
-            y = float(input("Enter the second number: "))
-            ENTRY = False
-        except ValueError as e:
-            print(f"Error: {e}")
 
-    action = input(
-        "(add, subtract, divide, multiply, modulus): ").strip().lower()
-    func = operation.get(action)
+    # Get the function based on the operation argument
+    func = operations.get(operation)
+
+    # Perform the calculation and handle errors
     if func:
         try:
-            result = func(x, y)
-            print(f"{result:.2f}")
+            result = func(a, b)
+            print(f"Result: {result:.2f}")
         except ValueError as e:
-            print(f"Error {e}")
+            print(f"Error: {e}")
     else:
-        print("Unsupported Operation.")
+        print("Unsupported Operation. Supported operations: add, subtract, multiply, divide, modulus.")
+
+if __name__ == "__main__":
+    main(sys.argv[1], sys.argv[2],sys.argv[3])
