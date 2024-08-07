@@ -78,26 +78,28 @@ jobs:
 
     - name: Push Docker image to Docker Hub
       run: docker push omaaartamer/python-calculator:latest
-
   deploy:
     runs-on: ubuntu-latest
-    needs: build-and-push
-
+    
     steps:
-    - name: Deploy to Linux VM
+    - name: Check out the code
+      uses: actions/checkout@v4
+    
+    - name: Deploy to Server
       uses: appleboy/ssh-action@v0.1.8
       with:
         host: ${{ secrets.SERVER_HOST }}
         username: ${{ secrets.SERVER_USER }}
-        port: 22
+        port: 22  # default SSH port
         key: ${{ secrets.SSH_PRIVATE_KEY }}
         script: |
           # Pull the latest Docker image from Docker Hub
           docker pull omaaartamer/python-calculator:latest
-
-          # Stop the existing container, if running
+    
+          # Stop and remove the existing container, if running
           docker stop calculator || true
           docker rm calculator || true
-
+    
           # Run the new Docker container
           docker run -d --name calculator -p 80:80 omaaartamer/python-calculator:latest
+  
