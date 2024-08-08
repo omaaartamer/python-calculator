@@ -1,0 +1,97 @@
+# Starter pipeline
+# Start with a minimal pipeline that you can customize to build and deploy your code.
+# Add steps that build, run tests, deploy, and more:
+# https://aka.ms/yaml
+trigger:
+  branches:
+    include:
+      - main
+
+stages:
+  - stage: Lint
+    jobs:
+      - job: LintCode
+        pool:
+          vmImage: 'ubuntu-latest'
+        steps:
+          - task: UsePythonVersion@0
+            inputs:
+              versionSpec: '3.x'
+              addToPath: true
+
+          - script: |
+              python -m pip install --upgrade pip
+              pip install pylint
+            displayName: 'Install dependencies'
+
+          - script: pylint calculator.py
+            displayName: 'Run Pylint'
+
+  - stage: Test
+    dependsOn: Lint
+    jobs:
+      - job: RunTests
+        pool:
+          vmImage: 'ubuntu-latest'
+        steps:
+          - task: UsePythonVersion@0
+            inputs:
+              versionSpec: '3.x'
+              addToPath: true
+
+          - script: |
+              python -m pip install --upgrade pip
+              pip install -r requirements.txt
+            displayName: 'Install dependencies'
+
+          - script: |
+              pytest --cov=calculator --cov-report=xml --junitxml=junit.xml test_calculator.py
+            displayName: 'Run tests and generate coverage report'
+
+          - task: PublishTestResults@2
+            inputs:
+              testResultsFormat: 'JUnit'
+              testResultsFiles: '**/junit.xml'
+            displayName: 'Publish test results'
+
+  - stage: BuildAndPush
+    dependsOn: Test
+    jobs:
+      - job: BuildAndPushDocker
+        pool:
+          vmImage: 'ubuntu-latest'
+        steps:
+          - script: docker build -t omaaartamer/python-calculator:latest .
+            displayName: 'Build Docker image'
+
+          - task: Docker@2
+            inputs:
+              containerRegistry: '$(dockerRegistryServiceConnection)'
+              repository: 'omaaartamer/python-calculator'
+              command: 'push'
+              tags: 'latest'
+            displayName: 'Push Docker image to registry'
+
+  - stage: Deploy
+    dependsOn: BuildAndPush
+    jobs:
+      - job: DeployToServer
+        pool:
+          vmImage: 'ubuntu-latest'
+        steps:
+          - task: DownloadPipelineArtifact@2
+            inputs:
+              buildType: 'current'
+              artifactName: 'drop'
+              downloadPath: '$(Pipeline.Workspace)'
+
+          - task: SSH@0
+            inputs:
+              sshEndpoint: '$(sshServiceConnection)'
+              runOptions: 'inline'
+              inline: |
+                docker pull omaaartamer/python-calculator:latest
+                docker stop calculator || true
+                docker rm calculator || true
+                docker run -d --name calculator -p 80:80 omaaartamer/python-calculator:latest
+            displayName: 'Deploy to server'
